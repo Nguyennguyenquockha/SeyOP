@@ -1,0 +1,73 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+-- Lấy HRP
+local function getCharacter()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart", 5)
+    return char, hrp
+end
+
+-- Hàm instant click cookie (lấy từ script bạn gửi)
+local function instantClickCookie(cookie)
+    if cookie and cookie:FindFirstChild("CookiePrompt") then
+        local prompt = cookie.CookiePrompt
+        prompt.HoldDuration = 0
+        pcall(function() fireproximityprompt(prompt) end)
+    end
+end
+
+-- Tìm cookies trong workspace
+local function findCookies()
+    local cookies = {}
+    for _, obj in pairs(workspace.Map.Functional.SpawnedItems:GetChildren()) do
+        if obj.Name == "CookieObject" and obj:FindFirstChild("CookiePrompt") and obj.PrimaryPart then
+            table.insert(cookies, obj)
+        end
+    end
+    return cookies
+end
+
+-- Sắp xếp cookie gần HRP nhất
+local function nearestCookies(hrp, cookies)
+    table.sort(cookies, function(a,b)
+        return (hrp.Position - a.PrimaryPart.Position).Magnitude < (hrp.Position - b.PrimaryPart.Position).Magnitude
+    end)
+    return cookies
+end
+
+-- Auto TP đến cookie
+local function teleportToCookie(cookie, hrp)
+    if cookie and cookie.PrimaryPart then
+        local targetPos = cookie.PrimaryPart.Position + Vector3.new(0,3,0)
+        local char = player.Character
+        if char and char.PrimaryPart then
+            pcall(function() char:PivotTo(CFrame.new(targetPos)) end)
+        elseif hrp then
+            pcall(function() hrp.CFrame = CFrame.new(targetPos) end)
+        end
+    end
+end
+
+-- Auto farm loop
+RunService.Heartbeat:Connect(function()
+    local _, hrp = getCharacter()
+    local cookies = findCookies()
+    cookies = nearestCookies(hrp, cookies)
+    for _, cookie in ipairs(cookies) do
+        teleportToCookie(cookie, hrp)
+        task.wait(0.08) -- chờ server nhận HRP
+        instantClickCookie(cookie)
+    end
+end)
+
+-- Bắt cookie mới spawn
+workspace.Map.Functional.SpawnedItems.ChildAdded:Connect(function(cookie)
+    if cookie.Name == "CookieObject" and cookie:FindFirstChild("CookiePrompt") and cookie.PrimaryPart then
+        local _, hrp = getCharacter()
+        teleportToCookie(cookie, hrp)
+        task.wait(0.08)
+        instantClickCookie(cookie)
+    end
+end)
