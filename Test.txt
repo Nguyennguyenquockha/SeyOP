@@ -1,8 +1,8 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 local startTime = tick()
-local cookiesCollected = 0
 
 local function getCharacter()
     local char = player.Character or player.CharacterAdded:Wait()
@@ -56,19 +56,17 @@ local function instantClickCookie(cookie)
     if cookie and cookie:FindFirstChild("CookiePrompt") then
         local prompt = cookie.CookiePrompt
         prompt.HoldDuration = 0
-        local success, _ = pcall(function() fireproximityprompt(prompt) end)
-        if success then
-            cookiesCollected += 1
-        end
+        pcall(function() fireproximityprompt(prompt) end)
     end
 end
 
+-- GUI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CookieStatusGUI"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0,280,0,160)
+frame.Size = UDim2.new(0,280,0,190)
 frame.Position = UDim2.new(0,20,0,20)
 frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
 frame.BorderSizePixel = 0
@@ -93,19 +91,9 @@ cookiesLabel.TextScaled = true
 cookiesLabel.Text = "Cookies: 0"
 cookiesLabel.Parent = frame
 
-local collectedLabel = Instance.new("TextLabel")
-collectedLabel.Size = UDim2.new(1,-10,0,25)
-collectedLabel.Position = UDim2.new(0,5,0,35)
-collectedLabel.BackgroundTransparency = 1
-collectedLabel.TextColor3 = Color3.fromRGB(180,230,180)
-collectedLabel.Font = Enum.Font.SourceSansBold
-collectedLabel.TextScaled = true
-collectedLabel.Text = "Collected: 0"
-collectedLabel.Parent = frame
-
 local playerLabel = Instance.new("TextLabel")
 playerLabel.Size = UDim2.new(1,-10,0,20)
-playerLabel.Position = UDim2.new(0,5,0,65)
+playerLabel.Position = UDim2.new(0,5,0,35)
 playerLabel.BackgroundTransparency = 1
 playerLabel.TextColor3 = Color3.fromRGB(230,230,230)
 playerLabel.Font = Enum.Font.SourceSansBold
@@ -115,7 +103,7 @@ playerLabel.Parent = frame
 
 local noclipLabel = Instance.new("TextLabel")
 noclipLabel.Size = UDim2.new(1,-10,0,20)
-noclipLabel.Position = UDim2.new(0,5,0,85)
+noclipLabel.Position = UDim2.new(0,5,0,55)
 noclipLabel.BackgroundTransparency = 1
 noclipLabel.TextColor3 = Color3.fromRGB(230,180,50)
 noclipLabel.Font = Enum.Font.SourceSansBold
@@ -125,7 +113,7 @@ noclipLabel.Parent = frame
 
 local timeLabel = Instance.new("TextLabel")
 timeLabel.Size = UDim2.new(1,-10,0,25)
-timeLabel.Position = UDim2.new(0,5,0,105)
+timeLabel.Position = UDim2.new(0,5,0,80)
 timeLabel.BackgroundTransparency = 1
 timeLabel.TextColor3 = Color3.fromRGB(230,230,230)
 timeLabel.Font = Enum.Font.SourceSansBold
@@ -133,9 +121,20 @@ timeLabel.TextScaled = true
 timeLabel.Text = "Time: 0s"
 timeLabel.Parent = frame
 
+-- ngày dùng
+local dateLabel = Instance.new("TextLabel")
+dateLabel.Size = UDim2.new(1,-10,0,20)
+dateLabel.Position = UDim2.new(0,5,0,110)
+dateLabel.BackgroundTransparency = 1
+dateLabel.TextColor3 = Color3.fromRGB(200,255,200)
+dateLabel.Font = Enum.Font.SourceSans
+dateLabel.TextScaled = true
+dateLabel.Text = "Date: "..os.date("%d/%m/%Y")
+dateLabel.Parent = frame
+
 local creditsLabel = Instance.new("TextLabel")
 creditsLabel.Size = UDim2.new(1,-10,0,20)
-creditsLabel.Position = UDim2.new(0,5,0,130)
+creditsLabel.Position = UDim2.new(0,5,0,135)
 creditsLabel.BackgroundTransparency = 1
 creditsLabel.TextColor3 = Color3.fromRGB(200,200,255)
 creditsLabel.Font = Enum.Font.SourceSans
@@ -143,6 +142,18 @@ creditsLabel.TextScaled = true
 creditsLabel.Text = "Credits: Sey (Kha hub)"
 creditsLabel.Parent = frame
 
+-- list tên người chơi khác
+local playersLabel = Instance.new("TextLabel")
+playersLabel.Size = UDim2.new(1,-10,0,25)
+playersLabel.Position = UDim2.new(0,5,0,160)
+playersLabel.BackgroundTransparency = 1
+playersLabel.TextColor3 = Color3.fromRGB(255,200,200)
+playersLabel.Font = Enum.Font.SourceSans
+playersLabel.TextScaled = true
+playersLabel.Text = "Others: none"
+playersLabel.Parent = frame
+
+-- Auto farm
 RunService.Heartbeat:Connect(function()
     local char, hrp = getCharacter()
     local cookies = findCookies()
@@ -160,14 +171,22 @@ RunService.Heartbeat:Connect(function()
 
     for _, cookie in ipairs(cookies) do
         teleportToCookie(cookie, hrp)
-        task.wait(0.05)
+        task.wait(0.08) -- chỉnh tốc độ TP 0.08s
         instantClickCookie(cookie)
     end
 
     cookiesLabel.Text = "Cookies: "..#cookies
-    collectedLabel.Text = "Collected: "..cookiesCollected
     playerLabel.Text = "Player: "..player.Name.." ("..(char.Humanoid.Health>0 and "Alive" or "Dead")..")"
     timeLabel.Text = string.format("Time: %ds", math.floor(tick()-startTime))
+
+    -- Cập nhật danh sách người chơi khác
+    local names = {}
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= player then
+            table.insert(names, plr.Name)
+        end
+    end
+    playersLabel.Text = "Others: "..(#names > 0 and table.concat(names, ", ") or "none")
 end)
 
 workspace.Map.Functional.SpawnedItems.ChildAdded:Connect(function(cookie)
@@ -175,11 +194,25 @@ workspace.Map.Functional.SpawnedItems.ChildAdded:Connect(function(cookie)
         local char, hrp = getCharacter()
         if not noclipEnabled then setNoclip(true) end
         teleportToCookie(cookie, hrp)
-        task.wait(0.05)
+        task.wait(0.08) -- chỉnh 0.08s
         instantClickCookie(cookie)
     end
 end)
 
+-- Auto retry khi chết
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        local char = player.Character or player.CharacterAdded:Wait()
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid and humanoid.Health <= 0 then
+            ReplicatedStorage:WaitForChild("Events"):WaitForChild("GameEvent"):FireServer("VoteRetry")
+            task.wait(3)
+        end
+    end
+end)
+
+-- Rainbow viền
 task.spawn(function()
     local hue = 0
     while true do
