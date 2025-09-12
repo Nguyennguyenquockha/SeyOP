@@ -1,8 +1,17 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
 local player = Players.LocalPlayer
 local startTime = tick()
+
+-- Thông báo khi chạy script
+StarterGui:SetCore("SendNotification", {
+    Title = "Notification",
+    Text = "Thanks for using my script <3",
+    Duration = 5,
+    Button1 = "Ok! ",
+})
 
 local function getCharacter()
     local char = player.Character or player.CharacterAdded:Wait()
@@ -121,7 +130,6 @@ timeLabel.TextScaled = true
 timeLabel.Text = "Time: 0s"
 timeLabel.Parent = frame
 
--- ngày dùng
 local dateLabel = Instance.new("TextLabel")
 dateLabel.Size = UDim2.new(1,-10,0,20)
 dateLabel.Position = UDim2.new(0,5,0,110)
@@ -142,7 +150,6 @@ creditsLabel.TextScaled = true
 creditsLabel.Text = "Credits: Sey (Kha hub)"
 creditsLabel.Parent = frame
 
--- list tên người chơi khác
 local playersLabel = Instance.new("TextLabel")
 playersLabel.Size = UDim2.new(1,-10,0,25)
 playersLabel.Position = UDim2.new(0,5,0,160)
@@ -171,7 +178,7 @@ RunService.Heartbeat:Connect(function()
 
     for _, cookie in ipairs(cookies) do
         teleportToCookie(cookie, hrp)
-        task.wait(0.08) -- chỉnh tốc độ TP 0.08s
+        task.wait(0.08)
         instantClickCookie(cookie)
     end
 
@@ -179,7 +186,6 @@ RunService.Heartbeat:Connect(function()
     playerLabel.Text = "Player: "..player.Name.." ("..(char.Humanoid.Health>0 and "Alive" or "Dead")..")"
     timeLabel.Text = string.format("Time: %ds", math.floor(tick()-startTime))
 
-    -- Cập nhật danh sách người chơi khác
     local names = {}
     for _, plr in pairs(Players:GetPlayers()) do
         if plr ~= player then
@@ -194,7 +200,7 @@ workspace.Map.Functional.SpawnedItems.ChildAdded:Connect(function(cookie)
         local char, hrp = getCharacter()
         if not noclipEnabled then setNoclip(true) end
         teleportToCookie(cookie, hrp)
-        task.wait(0.08) -- chỉnh 0.08s
+        task.wait(0.08)
         instantClickCookie(cookie)
     end
 end)
