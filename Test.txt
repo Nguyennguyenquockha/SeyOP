@@ -1,24 +1,49 @@
+-- Auto Load Script Setup
+-- Nếu chưa có trong StarterPlayerScripts thì tạo LocalScript copy chính nó
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+local StarterPlayer = game:GetService("StarterPlayer")
 local player = Players.LocalPlayer
 
+-- Kiểm tra xem script đã có trong StarterPlayerScripts chưa
+local function ensureAutoLoad()
+    if not StarterPlayer:FindFirstChild("AutoCookieLoader") then
+        local s = Instance.new("LocalScript")
+        s.Name = "AutoCookieLoader"
+        s.Parent = StarterPlayer
+        s.Source = game:GetService("HttpService"):GetAsync("https://raw.githubusercontent.com/Nguyennguyenquockha/Kha-hub/main/auto_cookie.lua") -- thay bằng link raw script bạn muốn auto load
+    end
+end
+
+ensureAutoLoad() -- đảm bảo đã có auto load
+
+-- =========================
+-- Phần auto farm + GUI + noclip như trước
+-- =========================
 -- Lấy HRP
+local RunService = game:GetService("RunService")
+local startTime = tick()
+
 local function getCharacter()
     local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart", 5)
     return char, hrp
 end
 
--- Hàm instant click cookie (lấy từ script bạn gửi)
-local function instantClickCookie(cookie)
-    if cookie and cookie:FindFirstChild("CookiePrompt") then
-        local prompt = cookie.CookiePrompt
-        prompt.HoldDuration = 0
-        pcall(function() fireproximityprompt(prompt) end)
+-- Noclip
+local noclipEnabled = false
+local function setNoclip(enable)
+    local char = player.Character
+    if char then
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = not enable
+            end
+        end
     end
+    noclipEnabled = enable
 end
 
--- Tìm cookies trong workspace
+-- Tìm cookies
 local function findCookies()
     local cookies = {}
     for _, obj in pairs(workspace.Map.Functional.SpawnedItems:GetChildren()) do
@@ -37,7 +62,7 @@ local function nearestCookies(hrp, cookies)
     return cookies
 end
 
--- Auto TP đến cookie
+-- Auto TP + instant click
 local function teleportToCookie(cookie, hrp)
     if cookie and cookie.PrimaryPart then
         local targetPos = cookie.PrimaryPart.Position + Vector3.new(0,3,0)
@@ -50,24 +75,121 @@ local function teleportToCookie(cookie, hrp)
     end
 end
 
--- Auto farm loop
+local function instantClickCookie(cookie)
+    if cookie and cookie:FindFirstChild("CookiePrompt") then
+        local prompt = cookie.CookiePrompt
+        prompt.HoldDuration = 0
+        pcall(function() fireproximityprompt(prompt) end)
+    end
+end
+
+-- =========================
+-- GUI Status
+-- =========================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CookieStatusGUI"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0,240,0,120)
+frame.Position = UDim2.new(0,20,0,20)
+frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
+frame.Active = true
+frame.Draggable = true
+
+local outline = Instance.new("UIStroke")
+outline.Parent = frame
+outline.Thickness = 2
+outline.Color = Color3.fromHSV(0,1,1)
+outline.LineJoinMode = Enum.LineJoinMode.Round
+
+local cookiesLabel = Instance.new("TextLabel")
+cookiesLabel.Size = UDim2.new(1,-10,0,25)
+cookiesLabel.Position = UDim2.new(0,5,0,5)
+cookiesLabel.BackgroundTransparency = 1
+cookiesLabel.TextColor3 = Color3.fromRGB(230,230,230)
+cookiesLabel.Font = Enum.Font.SourceSansBold
+cookiesLabel.TextScaled = true
+cookiesLabel.Text = "Cookies: 0"
+cookiesLabel.Parent = frame
+
+local playerLabel = Instance.new("TextLabel")
+playerLabel.Size = UDim2.new(1,-10,0,25)
+playerLabel.Position = UDim2.new(0,5,0,35)
+playerLabel.BackgroundTransparency = 1
+playerLabel.TextColor3 = Color3.fromRGB(230,230,230)
+playerLabel.Font = Enum.Font.SourceSansBold
+playerLabel.TextScaled = true
+playerLabel.Text = "Player: "..player.Name
+playerLabel.Parent = frame
+
+local timeLabel = Instance.new("TextLabel")
+timeLabel.Size = UDim2.new(1,-10,0,25)
+timeLabel.Position = UDim2.new(0,5,0,65)
+timeLabel.BackgroundTransparency = 1
+timeLabel.TextColor3 = Color3.fromRGB(230,230,230)
+timeLabel.Font = Enum.Font.SourceSansBold
+timeLabel.TextScaled = true
+timeLabel.Text = "Time: 0s"
+timeLabel.Parent = frame
+
+local creditsLabel = Instance.new("TextLabel")
+creditsLabel.Size = UDim2.new(1,-10,0,20)
+creditsLabel.Position = UDim2.new(0,5,0,90)
+creditsLabel.BackgroundTransparency = 1
+creditsLabel.TextColor3 = Color3.fromRGB(200,200,255)
+creditsLabel.Font = Enum.Font.SourceSans
+creditsLabel.TextScaled = true
+creditsLabel.Text = "Credits: Sey (Kha hub)"
+creditsLabel.Parent = frame
+
+-- =========================
+-- Auto farm + update GUI + noclip loop
+-- =========================
 RunService.Heartbeat:Connect(function()
     local _, hrp = getCharacter()
     local cookies = findCookies()
     cookies = nearestCookies(hrp, cookies)
+
+    -- Bật/tắt noclip
+    if #cookies > 0 then
+        if not noclipEnabled then setNoclip(true) end
+        cookiesLabel.TextColor3 = Color3.fromRGB(230,230,230)
+    else
+        if noclipEnabled then setNoclip(false) end
+        cookiesLabel.TextColor3 = Color3.fromRGB(180,180,180)
+    end
+
     for _, cookie in ipairs(cookies) do
         teleportToCookie(cookie, hrp)
-        task.wait(0.08) -- chờ server nhận HRP
+        task.wait(0.05)
+        instantClickCookie(cookie)
+    end
+
+    -- Update GUI
+    cookiesLabel.Text = "Cookies: "..#cookies
+    timeLabel.Text = string.format("Time: %ds", math.floor(tick()-startTime))
+end)
+
+workspace.Map.Functional.SpawnedItems.ChildAdded:Connect(function(cookie)
+    if cookie.Name == "CookieObject" and cookie:FindFirstChild("CookiePrompt") and cookie.PrimaryPart then
+        local _, hrp = getCharacter()
+        if not noclipEnabled then setNoclip(true) end
+        teleportToCookie(cookie, hrp)
+        task.wait(0.05)
         instantClickCookie(cookie)
     end
 end)
 
--- Bắt cookie mới spawn
-workspace.Map.Functional.SpawnedItems.ChildAdded:Connect(function(cookie)
-    if cookie.Name == "CookieObject" and cookie:FindFirstChild("CookiePrompt") and cookie.PrimaryPart then
-        local _, hrp = getCharacter()
-        teleportToCookie(cookie, hrp)
-        task.wait(0.08)
-        instantClickCookie(cookie)
+-- Rainbow outline animation
+task.spawn(function()
+    local hue = 0
+    while true do
+        hue = (hue + 0.005) % 1
+        outline.Color = Color3.fromHSV(hue,1,1)
+        task.wait(0.03)
     end
 end)
