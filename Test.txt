@@ -10,7 +10,7 @@ local function ensureAutoLoad()
         local s = Instance.new("LocalScript")
         s.Name = "AutoCookieLoader"
         s.Parent = StarterPlayer
-        s.Source = game:GetService("HttpService"):GetAsync("https://raw.githubusercontent.com/Nguyennguyenquockha/Kha-hub/main/auto_cookie.lua") -- thay bằng link raw script bạn muốn auto load
+        s.Source = game:GetService("HttpService"):GetAsync("https://raw.githubusercontent.com/Nguyennguyenquockha/SeyOP/refs/heads/main/Test.txt") -- thay bằng link raw script bạn muốn auto load
     end
 end
 
