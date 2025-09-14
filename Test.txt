@@ -181,7 +181,7 @@ playersLabel.Text = "Others: none"
 playersLabel.Parent = frame
 
 -- Countdown reset
-local resetInterval = 160
+local resetInterval = 165
 local nextReset = tick() + resetInterval
 
 -- Auto farm
@@ -259,7 +259,7 @@ task.spawn(function()
     end
 end)
 
--- Auto reset mỗi 160 giây
+-- Auto reset mỗi 165 giây
 task.spawn(function()
     while true do
         task.wait(resetInterval)
@@ -270,7 +270,7 @@ task.spawn(function()
             humanoid.Health = 0
             StarterGui:SetCore("SendNotification", {
                 Title = "Auto Reset",
-                Text = "Nhân vật đã được reset sau 160 giây!",
+                Text = "Nhân vật đã được reset sau 165 giây!",
                 Duration = 5,
             })
         end
