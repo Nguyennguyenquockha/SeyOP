@@ -2,11 +2,10 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
+local UserInputService = game:GetService("UserInputService")
+local VirtualUser = game:GetService("VirtualUser") -- Anti AFK
 local player = Players.LocalPlayer
 local startTime = tick()
-
--- Tọa độ an toàn
-local safeZone = Vector3.new(20.25237464904785, 115.29972839355469, -237.6287384033203)
 
 -- Thông báo khi chạy script
 StarterGui:SetCore("SendNotification", {
@@ -15,6 +14,13 @@ StarterGui:SetCore("SendNotification", {
     Duration = 5,
     Button1 = "Ok! ",
 })
+
+-- Anti AFK
+player.Idled:Connect(function()
+    VirtualUser:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    VirtualUser:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+end)
 
 local function getCharacter()
     local char = player.Character or player.CharacterAdded:Wait()
@@ -72,18 +78,18 @@ local function instantClickCookie(cookie)
     end
 end
 
--- GUI
+-- GUI (thu nhỏ)
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CookieStatusGUI"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0,280,0,220)
+frame.Size = UDim2.new(0,220,0,180) -- nhỏ hơn
 frame.Position = UDim2.new(0,20,0,20)
 frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
 frame.BorderSizePixel = 0
 frame.Parent = screenGui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,10)
 frame.Active = true
 frame.Draggable = true
 
@@ -91,97 +97,29 @@ local outline = Instance.new("UIStroke")
 outline.Parent = frame
 outline.Thickness = 2
 outline.Color = Color3.fromHSV(0,1,1)
-outline.LineJoinMode = Enum.LineJoinMode.Round
 
-local cookiesLabel = Instance.new("TextLabel")
-cookiesLabel.Size = UDim2.new(1,-10,0,25)
-cookiesLabel.Position = UDim2.new(0,5,0,5)
-cookiesLabel.BackgroundTransparency = 1
-cookiesLabel.TextColor3 = Color3.fromRGB(230,230,230)
-cookiesLabel.Font = Enum.Font.SourceSansBold
-cookiesLabel.TextScaled = true
-cookiesLabel.Text = "Cookies: 0"
-cookiesLabel.Parent = frame
+local function createLabel(y,text,color)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1,-10,0,18)
+    lbl.Position = UDim2.new(0,5,0,y)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = color or Color3.fromRGB(230,230,230)
+    lbl.Font = Enum.Font.SourceSansBold
+    lbl.TextScaled = true
+    lbl.Text = text
+    lbl.Parent = frame
+    return lbl
+end
 
-local playerLabel = Instance.new("TextLabel")
-playerLabel.Size = UDim2.new(1,-10,0,20)
-playerLabel.Position = UDim2.new(0,5,0,35)
-playerLabel.BackgroundTransparency = 1
-playerLabel.TextColor3 = Color3.fromRGB(230,230,230)
-playerLabel.Font = Enum.Font.SourceSansBold
-playerLabel.TextScaled = true
-playerLabel.Text = "Player: "..player.Name.." (Alive)"
-playerLabel.Parent = frame
-
-local noclipLabel = Instance.new("TextLabel")
-noclipLabel.Size = UDim2.new(1,-10,0,20)
-noclipLabel.Position = UDim2.new(0,5,0,55)
-noclipLabel.BackgroundTransparency = 1
-noclipLabel.TextColor3 = Color3.fromRGB(230,180,50)
-noclipLabel.Font = Enum.Font.SourceSansBold
-noclipLabel.TextScaled = true
-noclipLabel.Text = "Noclip: OFF"
-noclipLabel.Parent = frame
-
-local farmingLabel = Instance.new("TextLabel")
-farmingLabel.Size = UDim2.new(1,-10,0,20)
-farmingLabel.Position = UDim2.new(0,5,0,75)
-farmingLabel.BackgroundTransparency = 1
-farmingLabel.TextColor3 = Color3.fromRGB(100,255,100)
-farmingLabel.Font = Enum.Font.SourceSansBold
-farmingLabel.TextScaled = true
-farmingLabel.Text = "Farming: Stopped"
-farmingLabel.Parent = frame
-
-local timeLabel = Instance.new("TextLabel")
-timeLabel.Size = UDim2.new(1,-10,0,25)
-timeLabel.Position = UDim2.new(0,5,0,100)
-timeLabel.BackgroundTransparency = 1
-timeLabel.TextColor3 = Color3.fromRGB(230,230,230)
-timeLabel.Font = Enum.Font.SourceSansBold
-timeLabel.TextScaled = true
-timeLabel.Text = "Time: 0s"
-timeLabel.Parent = frame
-
-local resetCountdownLabel = Instance.new("TextLabel")
-resetCountdownLabel.Size = UDim2.new(1,-10,0,25)
-resetCountdownLabel.Position = UDim2.new(0,5,0,125)
-resetCountdownLabel.BackgroundTransparency = 1
-resetCountdownLabel.TextColor3 = Color3.fromRGB(255,200,100)
-resetCountdownLabel.Font = Enum.Font.SourceSansBold
-resetCountdownLabel.TextScaled = true
-resetCountdownLabel.Text = "Reset in: 164s"
-resetCountdownLabel.Parent = frame
-
-local dateLabel = Instance.new("TextLabel")
-dateLabel.Size = UDim2.new(1,-10,0,20)
-dateLabel.Position = UDim2.new(0,5,0,150)
-dateLabel.BackgroundTransparency = 1
-dateLabel.TextColor3 = Color3.fromRGB(200,255,200)
-dateLabel.Font = Enum.Font.SourceSans
-dateLabel.TextScaled = true
-dateLabel.Text = "Date: "..os.date("%d/%m/%Y")
-dateLabel.Parent = frame
-
-local creditsLabel = Instance.new("TextLabel")
-creditsLabel.Size = UDim2.new(1,-10,0,20)
-creditsLabel.Position = UDim2.new(0,5,0,175)
-creditsLabel.BackgroundTransparency = 1
-creditsLabel.TextColor3 = Color3.fromRGB(200,200,255)
-creditsLabel.Font = Enum.Font.SourceSans
-creditsLabel.TextScaled = true
-creditsLabel.Text = "Credits: Sey (Kha hub)"
-creditsLabel.Parent = frame
-
-local playersLabel = Instance.new("TextLabel")
-playersLabel.Size = UDim2.new(1,-10,0,25)
-playersLabel.Position = UDim2.new(0,5,0,200)
-playersLabel.BackgroundTransparency = 1
-playersLabel.TextColor3 = Color3.fromRGB(255,200,200)
-playersLabel.Font = Enum.Font.SourceSans
-playersLabel.TextScaled = true
-playersLabel.Text = "Others: none"
-playersLabel.Parent = frame
+local cookiesLabel = createLabel(5,"Cookies: 0")
+local playerLabel = createLabel(25,"Player: "..player.Name.." (Alive)")
+local noclipLabel = createLabel(45,"Noclip: OFF",Color3.fromRGB(230,180,50))
+local infJumpLabel = createLabel(65,"Inf Jump: ON",Color3.fromRGB(150,200,255))
+local farmingLabel = createLabel(85,"Farming: Stopped",Color3.fromRGB(100,255,100))
+local timeLabel = createLabel(105,"Time: 0s")
+local resetCountdownLabel = createLabel(125,"Reset in: 164s",Color3.fromRGB(255,200,100))
+local dateLabel = createLabel(145,"Date: "..os.date("%d/%m/%Y"),Color3.fromRGB(200,255,200))
+local creditsLabel = createLabel(165,"Credits: Sey (Kha hub)",Color3.fromRGB(200,200,255))
 
 -- Countdown reset
 local resetInterval = 164
@@ -196,7 +134,6 @@ RunService.Heartbeat:Connect(function()
     if #cookies > 0 then
         if not noclipEnabled then setNoclip(true) end
         noclipLabel.Text = "Noclip: ON"
-        cookiesLabel.TextColor3 = Color3.fromRGB(230,230,230)
         farmingLabel.Text = "Farming: ON"
         farmingLabel.TextColor3 = Color3.fromRGB(100,255,100)
 
@@ -206,32 +143,18 @@ RunService.Heartbeat:Connect(function()
             instantClickCookie(cookie)
         end
     else
-        -- Hết bánh -> TP safe zone
-        if hrp then
-            hrp.CFrame = CFrame.new(safeZone)
-        end
-
         if noclipEnabled then setNoclip(false) end
         noclipLabel.Text = "Noclip: OFF"
-        cookiesLabel.TextColor3 = Color3.fromRGB(180,180,180)
         farmingLabel.Text = "Farming: Stopped"
         farmingLabel.TextColor3 = Color3.fromRGB(255,100,100)
     end
 
     cookiesLabel.Text = "Cookies: "..#cookies
-    playerLabel.Text = "Player: "..player.Name.." ("..(char.Humanoid.Health>0 and "Alive" or "Dead")..")"
+    playerLabel.Text = "Player: "..player.Name.." ("..((char.Humanoid.Health>0) and "Alive" or "Dead")..")"
     timeLabel.Text = string.format("Time: %ds", math.floor(tick()-startTime))
 
     local countdown = math.max(0, math.floor(nextReset - tick()))
     resetCountdownLabel.Text = "Reset in: "..countdown.."s"
-
-    local names = {}
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= player then
-            table.insert(names, plr.Name)
-        end
-    end
-    playersLabel.Text = "Others: "..(#names > 0 and table.concat(names, ", ") or "none")
 end)
 
 workspace.Map.Functional.SpawnedItems.ChildAdded:Connect(function(cookie)
@@ -282,5 +205,14 @@ task.spawn(function()
                 Duration = 5,
             })
         end
+    end
+end)
+
+-- Inf Jump
+UserInputService.JumpRequest:Connect(function()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end)
