@@ -75,7 +75,7 @@ screenGui.Name = "CookieStatusGUI"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0,280,0,190)
+frame.Size = UDim2.new(0,280,0,220)
 frame.Position = UDim2.new(0,20,0,20)
 frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
 frame.BorderSizePixel = 0
@@ -120,9 +120,19 @@ noclipLabel.TextScaled = true
 noclipLabel.Text = "Noclip: OFF"
 noclipLabel.Parent = frame
 
+local farmingLabel = Instance.new("TextLabel")
+farmingLabel.Size = UDim2.new(1,-10,0,20)
+farmingLabel.Position = UDim2.new(0,5,0,75)
+farmingLabel.BackgroundTransparency = 1
+farmingLabel.TextColor3 = Color3.fromRGB(100,255,100)
+farmingLabel.Font = Enum.Font.SourceSansBold
+farmingLabel.TextScaled = true
+farmingLabel.Text = "Farming: Stopped"
+farmingLabel.Parent = frame
+
 local timeLabel = Instance.new("TextLabel")
 timeLabel.Size = UDim2.new(1,-10,0,25)
-timeLabel.Position = UDim2.new(0,5,0,80)
+timeLabel.Position = UDim2.new(0,5,0,100)
 timeLabel.BackgroundTransparency = 1
 timeLabel.TextColor3 = Color3.fromRGB(230,230,230)
 timeLabel.Font = Enum.Font.SourceSansBold
@@ -130,9 +140,19 @@ timeLabel.TextScaled = true
 timeLabel.Text = "Time: 0s"
 timeLabel.Parent = frame
 
+local resetCountdownLabel = Instance.new("TextLabel")
+resetCountdownLabel.Size = UDim2.new(1,-10,0,25)
+resetCountdownLabel.Position = UDim2.new(0,5,0,125)
+resetCountdownLabel.BackgroundTransparency = 1
+resetCountdownLabel.TextColor3 = Color3.fromRGB(255,200,100)
+resetCountdownLabel.Font = Enum.Font.SourceSansBold
+resetCountdownLabel.TextScaled = true
+resetCountdownLabel.Text = "Reset in: 159s"
+resetCountdownLabel.Parent = frame
+
 local dateLabel = Instance.new("TextLabel")
 dateLabel.Size = UDim2.new(1,-10,0,20)
-dateLabel.Position = UDim2.new(0,5,0,110)
+dateLabel.Position = UDim2.new(0,5,0,150)
 dateLabel.BackgroundTransparency = 1
 dateLabel.TextColor3 = Color3.fromRGB(200,255,200)
 dateLabel.Font = Enum.Font.SourceSans
@@ -142,7 +162,7 @@ dateLabel.Parent = frame
 
 local creditsLabel = Instance.new("TextLabel")
 creditsLabel.Size = UDim2.new(1,-10,0,20)
-creditsLabel.Position = UDim2.new(0,5,0,135)
+creditsLabel.Position = UDim2.new(0,5,0,175)
 creditsLabel.BackgroundTransparency = 1
 creditsLabel.TextColor3 = Color3.fromRGB(200,200,255)
 creditsLabel.Font = Enum.Font.SourceSans
@@ -152,13 +172,17 @@ creditsLabel.Parent = frame
 
 local playersLabel = Instance.new("TextLabel")
 playersLabel.Size = UDim2.new(1,-10,0,25)
-playersLabel.Position = UDim2.new(0,5,0,160)
+playersLabel.Position = UDim2.new(0,5,0,200)
 playersLabel.BackgroundTransparency = 1
 playersLabel.TextColor3 = Color3.fromRGB(255,200,200)
 playersLabel.Font = Enum.Font.SourceSans
 playersLabel.TextScaled = true
 playersLabel.Text = "Others: none"
 playersLabel.Parent = frame
+
+-- Countdown reset
+local resetInterval = 159
+local nextReset = tick() + resetInterval
 
 -- Auto farm
 RunService.Heartbeat:Connect(function()
@@ -170,10 +194,14 @@ RunService.Heartbeat:Connect(function()
         if not noclipEnabled then setNoclip(true) end
         noclipLabel.Text = "Noclip: ON"
         cookiesLabel.TextColor3 = Color3.fromRGB(230,230,230)
+        farmingLabel.Text = "Farming: ON"
+        farmingLabel.TextColor3 = Color3.fromRGB(100,255,100)
     else
         if noclipEnabled then setNoclip(false) end
         noclipLabel.Text = "Noclip: OFF"
         cookiesLabel.TextColor3 = Color3.fromRGB(180,180,180)
+        farmingLabel.Text = "Farming: Stopped"
+        farmingLabel.TextColor3 = Color3.fromRGB(255,100,100)
     end
 
     for _, cookie in ipairs(cookies) do
@@ -185,6 +213,9 @@ RunService.Heartbeat:Connect(function()
     cookiesLabel.Text = "Cookies: "..#cookies
     playerLabel.Text = "Player: "..player.Name.." ("..(char.Humanoid.Health>0 and "Alive" or "Dead")..")"
     timeLabel.Text = string.format("Time: %ds", math.floor(tick()-startTime))
+
+    local countdown = math.max(0, math.floor(nextReset - tick()))
+    resetCountdownLabel.Text = "Reset in: "..countdown.."s"
 
     local names = {}
     for _, plr in pairs(Players:GetPlayers()) do
@@ -225,5 +256,23 @@ task.spawn(function()
         hue = (hue + 0.005) % 1
         outline.Color = Color3.fromHSV(hue,1,1)
         task.wait(0.03)
+    end
+end)
+
+-- Auto reset mỗi 159 giây
+task.spawn(function()
+    while true do
+        task.wait(resetInterval)
+        nextReset = tick() + resetInterval
+        local char = player.Character or player.CharacterAdded:Wait()
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.Health = 0
+            StarterGui:SetCore("SendNotification", {
+                Title = "Auto Reset",
+                Text = "Nhân vật đã được reset sau 159 giây!",
+                Duration = 5,
+            })
+        end
     end
 end)
