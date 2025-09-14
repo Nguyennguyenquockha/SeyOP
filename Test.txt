@@ -5,6 +5,9 @@ local StarterGui = game:GetService("StarterGui")
 local player = Players.LocalPlayer
 local startTime = tick()
 
+-- Tọa độ an toàn
+local safeZone = Vector3.new(20.25237464904785, 115.29972839355469, -237.6287384033203)
+
 -- Thông báo khi chạy script
 StarterGui:SetCore("SendNotification", {
     Title = "Notification",
@@ -147,7 +150,7 @@ resetCountdownLabel.BackgroundTransparency = 1
 resetCountdownLabel.TextColor3 = Color3.fromRGB(255,200,100)
 resetCountdownLabel.Font = Enum.Font.SourceSansBold
 resetCountdownLabel.TextScaled = true
-resetCountdownLabel.Text = "Reset in: 159s"
+resetCountdownLabel.Text = "Reset in: 164s"
 resetCountdownLabel.Parent = frame
 
 local dateLabel = Instance.new("TextLabel")
@@ -181,7 +184,7 @@ playersLabel.Text = "Others: none"
 playersLabel.Parent = frame
 
 -- Countdown reset
-local resetInterval = 165
+local resetInterval = 164
 local nextReset = tick() + resetInterval
 
 -- Auto farm
@@ -196,18 +199,23 @@ RunService.Heartbeat:Connect(function()
         cookiesLabel.TextColor3 = Color3.fromRGB(230,230,230)
         farmingLabel.Text = "Farming: ON"
         farmingLabel.TextColor3 = Color3.fromRGB(100,255,100)
+
+        for _, cookie in ipairs(cookies) do
+            teleportToCookie(cookie, hrp)
+            task.wait(0.08)
+            instantClickCookie(cookie)
+        end
     else
+        -- Hết bánh -> TP safe zone
+        if hrp then
+            hrp.CFrame = CFrame.new(safeZone)
+        end
+
         if noclipEnabled then setNoclip(false) end
         noclipLabel.Text = "Noclip: OFF"
         cookiesLabel.TextColor3 = Color3.fromRGB(180,180,180)
         farmingLabel.Text = "Farming: Stopped"
         farmingLabel.TextColor3 = Color3.fromRGB(255,100,100)
-    end
-
-    for _, cookie in ipairs(cookies) do
-        teleportToCookie(cookie, hrp)
-        task.wait(0.08)
-        instantClickCookie(cookie)
     end
 
     cookiesLabel.Text = "Cookies: "..#cookies
@@ -259,7 +267,7 @@ task.spawn(function()
     end
 end)
 
--- Auto reset mỗi 165 giây
+-- Auto reset mỗi 164 giây
 task.spawn(function()
     while true do
         task.wait(resetInterval)
@@ -270,7 +278,7 @@ task.spawn(function()
             humanoid.Health = 0
             StarterGui:SetCore("SendNotification", {
                 Title = "Auto Reset",
-                Text = "Nhân vật đã được reset sau 165 giây!",
+                Text = "Nhân vật đã được reset sau 164 giây!",
                 Duration = 5,
             })
         end
