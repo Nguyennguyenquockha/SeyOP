@@ -1,0 +1,419 @@
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+local Window = WindUI:CreateWindow({
+    Title = "Break Brainrot Bones",
+    Icon = "bone",
+    Author = "By Kmenin YTB and Kha hub",
+    Folder = "KhasuperHub",
+    Size = UDim2.fromOffset(452, 362),
+    Transparent = true,
+    Theme = "Dark",
+    Resizable = false,
+    SideBarWidth = 200,
+    BackgroundImageTransparency = 0.42,
+    HideSearchBar = false,
+    ScrollBarEnabled = true,
+})
+
+Window:EditOpenButton({
+    Title = "Open The script",
+    Icon = "monitor",
+    CornerRadius = UDim.new(0,16),
+    StrokeThickness = 2,
+    Color = ColorSequence.new(
+        Color3.fromHex("4169E1"), 
+        Color3.fromHex("50C878")
+    ),
+    OnlyMobile = false,
+    Enabled = true,
+    Draggable = true,
+})
+
+local MTab = Window:Tab({Title = "Main", Icon = "timer", Locked = false, })
+local ITab = Window:Tab({Title = "Misc", Icon = "scroll", Locked = false, })
+local STab = Window:Tab({Title = "Server", Icon = "server", Locked = false, })
+
+local defaultGravity = workspace.Gravity
+local customGravityEnabled = false
+local lastCustomGravity = defaultGravity
+
+local Slider = MTab:Slider({
+    Title = "Gravity Slider",
+    Step = 10,
+    Value = {
+        Min = 1,
+        Max = 1000,
+        Default = lastCustomGravity,
+    },
+    Callback = function(value)
+        lastCustomGravity = value
+        if customGravityEnabled then
+            workspace.Gravity = value
+        end
+    end
+})
+
+local GravityToggle = MTab:Toggle({
+    Title = "Custom Gravity",
+    Desc = "",
+    Icon = "globe",
+    Default = false,
+    Callback = function(state)
+        customGravityEnabled = state
+        if state then
+            workspace.Gravity = lastCustomGravity
+        else
+            workspace.Gravity = defaultGravity
+        end
+    end
+}) 
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local tpPosition = Vector3.new(-536, 1118, -265)
+local delayTime = 3.5
+getgenv().AutoTP = false
+
+local Toggle = MTab:Toggle({
+    Title = "Auto TP in 3.5s",
+    Desc = "",
+    Icon = "map-pin",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoTP = state
+    end
+})
+
+local SectionB = MTab:Section({Title = "Ragdoll", TextXAlignment = "Left", TextSize = 19, })
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+local character, humanoid
+local spinConnection
+local spinning = false
+local spinSpeed = 25
+
+local function stopSpin()
+    if spinConnection then
+        spinConnection:Disconnect()
+        spinConnection = nil
+    end
+end
+
+local function startSpin()
+    stopSpin()
+    spinConnection = RunService.Heartbeat:Connect(function()
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(spinSpeed), 0)
+        end
+    end)
+end
+
+local function setupCharacter(char)
+    character = char
+    humanoid = character:WaitForChild("Humanoid")
+
+    if spinning then
+        humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+        startSpin()
+    end
+end
+
+player.CharacterAdded:Connect(setupCharacter)
+if player.Character then
+    setupCharacter(player.Character)
+end
+
+local Toggle = MTab:Toggle({
+    Title = "Ragdoll Spinning",
+    Desc = "Working when Brainrot ragdoll",
+    Icon = "refresh-cw",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        spinning = state
+        if state then
+            if humanoid then
+                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+            end
+            startSpin()
+        else
+            stopSpin()
+            if humanoid then
+                humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end
+        end
+    end
+})
+
+local Toggle = MTab:Slider({
+    Title = "Spin Speed",
+    Step = 1,
+    Value = {
+        Min = 10,
+        Max = 250,
+        Default = spinSpeed,
+    },
+    Callback = function(value)
+        spinSpeed = value
+    end
+})
+
+task.spawn(function()
+    while true do
+        task.wait(delayTime)
+        if getgenv().AutoTP and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            player.Character.HumanoidRootPart.CFrame = CFrame.new(tpPosition)
+        end
+    end
+end)
+
+local SectionA = ITab:Section({Title = "Players", TextXAlignment = "Left", TextSize = 19, })
+
+local Button = ITab:Button({
+    Title = "Boost FPS",
+    Desc = "",
+    Locked = false,
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/vexroxd/My-Script-/main/roblox%20fps%20unlocker%20script.lua"))()
+    end
+})
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local function getHumanoid()
+    local char = player.Character or player.CharacterAdded:Wait()
+    return char:WaitForChild("Humanoid")
+end
+
+local humanoid = getHumanoid()
+local defaultSpeed = humanoid.WalkSpeed
+local customEnabled = false
+local currentSpeed = defaultSpeed
+
+local Toggle = ITab:Toggle({
+    Title = "Custom Speed",
+    Desc = "",
+    Icon = "bird",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        customEnabled = state
+        if state then
+            humanoid.WalkSpeed = currentSpeed
+        else
+            humanoid.WalkSpeed = defaultSpeed
+        end
+    end
+})
+
+local Slider = ITab:Slider({
+    Title = "Speed Value",
+    Step = 1,
+    Value = {
+        Min = 0,
+        Max = 500,
+        Default = defaultSpeed,
+    },
+    Callback = function(value)
+        currentSpeed = value
+        if customEnabled then
+            humanoid.WalkSpeed = value
+        end
+    end
+})
+
+local Button = ITab:Button({
+    Title = "Reset Speed",
+    Desc = "",
+    Locked = false,
+    Callback = function()
+        currentSpeed = defaultSpeed
+        Slider:Set(defaultSpeed)
+        humanoid.WalkSpeed = defaultSpeed
+    end
+})
+
+player.CharacterAdded:Connect(function()
+    humanoid = getHumanoid()
+    if customEnabled then
+        humanoid.WalkSpeed = currentSpeed
+    end
+end)
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local humanoid = nil
+local infJumpEnabled = false
+
+local function getHumanoid()
+    local char = player.Character or player.CharacterAdded:Wait()
+    return char:WaitForChild("Humanoid")
+end
+humanoid = getHumanoid()
+player.CharacterAdded:Connect(function()
+    humanoid = getHumanoid()
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if infJumpEnabled and humanoid then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+local Toggle = ITab:Toggle({
+    Title = "Infinite Jump",
+    Desc = "",
+    Icon = "arrow-up",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        infJumpEnabled = state
+    end
+})
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local noclipConnection
+
+local Toggle = ITab:Toggle({
+    Title = "Noclip",
+    Desc = "",
+    Icon = "check",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state) 
+        if state then
+            noclipConnection = RunService.Stepped:Connect(function()
+                if LocalPlayer.Character then
+                    for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                        if part:IsA("BasePart") and part.CanCollide then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        else
+            if noclipConnection then
+                noclipConnection:Disconnect()
+                noclipConnection = nil
+            end
+            if LocalPlayer.Character then
+                for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end
+    end
+})
+
+local SectionC = STab:Section({Title = "Server", TextXAlignment = "Left", TextSize = 19, })
+
+local Button = STab:Button({
+    Title = "Rejoin",
+    Desc = "Rejoin the server",
+    Locked = false,
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+        TeleportService:Teleport(game.PlaceId, player)
+    end
+})
+
+local Button = STab:Button({
+    Title = "Server Hop (Least Players)",
+    Desc = "Join the emptiest server available",
+    Locked = false,
+    Callback = function()
+        local HttpService = game:GetService("HttpService")
+        local TeleportService = game:GetService("TeleportService")
+        local Players = game:GetService("Players")
+
+        local placeId = game.PlaceId
+        local bestServer = nil
+        local bestCount = math.huge
+        local cursor = ""
+        local success, result
+
+        repeat
+            success, result = pcall(function()
+                return HttpService:JSONDecode(
+                    game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. cursor)
+                )
+            end)
+
+            if success and result and result.data then
+                for _, server in pairs(result.data) do
+                    if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                        if server.playing < bestCount then
+                            bestCount = server.playing
+                            bestServer = server.id
+                        end
+                    end
+                end
+                cursor = result.nextPageCursor or ""
+            else
+                break
+            end
+        until cursor == "" or bestServer ~= nil
+
+        if bestServer then
+            TeleportService:TeleportToPlaceInstance(placeId, bestServer, Players.LocalPlayer)
+        else
+            warn("Không tìm thấy server nào phù hợp để hop!")
+        end
+    end
+})
+
+local Button = STab:Button({
+    Title = "Server Hop",
+    Desc = "Join a different server",
+    Locked = false,
+    Callback = function()
+        local HttpService = game:GetService("HttpService")
+        local TeleportService = game:GetService("TeleportService")
+        local Players = game:GetService("Players")
+
+        local placeId = game.PlaceId
+        local servers = {}
+        local cursor = ""
+        local success, result
+
+        -- Lấy danh sách server
+        repeat
+            success, result = pcall(function()
+                return HttpService:JSONDecode(
+                    game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. cursor)
+                )
+            end)
+
+            if success and result and result.data then
+                for _, server in pairs(result.data) do
+                    if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                        table.insert(servers, server.id)
+                    end
+                end
+                cursor = result.nextPageCursor or ""
+            else
+                break
+            end
+        until cursor == "" or #servers > 0
+
+        -- Teleport tới server ngẫu nhiên
+        if #servers > 0 then
+            local randomServer = servers[math.random(1, #servers)]
+            TeleportService:TeleportToPlaceInstance(placeId, randomServer, Players.LocalPlayer)
+        else
+            warn("Không tìm thấy server nào để hop!")
+        end
+    end
+})
