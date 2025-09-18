@@ -54,7 +54,7 @@ Background=ColorSequence.new{
     ColorSequenceKeypoint.new(0.50, Color3.fromRGB(32,32,32)),
     ColorSequenceKeypoint.new(1.00, Color3.fromRGB(25,25,25))
 },
-Primary=Color3.fromRGB(88,101,242),
+Primary=Color3.fromRGB(0,200,83), -- xanh lá chính
 OnPrimary=Color3.fromRGB(61,67,135),
 ScrollBar=Color3.fromRGB(0,180,90), -- thanh cuộn xanh lá
 Stroke=Color3.fromRGB(0,120,60), -- viền xanh lá
@@ -86,7 +86,7 @@ Slider={
     SliderNumber=Color3.fromRGB(0,255,128), -- số xanh lá sáng
 },
 Dropdown={
-    Holder=Color3.fromRGB(30,60,30), -- nền drop xanh lá nhẹ
+    Holder=Color3.fromRGB(30,30,30), -- nền drop xanh lá nhẹ
 }
 },
 Icons={
