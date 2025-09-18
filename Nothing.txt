@@ -55,7 +55,7 @@ Background=ColorSequence.new{
     ColorSequenceKeypoint.new(1.00, Color3.fromRGB(25,25,25))
 },
 Primary=Color3.fromRGB(0,200,83), -- xanh lá chính
-OnPrimary=Color3.fromRGB(61,67,135),
+OnPrimary=Color3.fromRGB(0,150,60), -- xanh lá đậm hơn
 ScrollBar=Color3.fromRGB(0,180,90), -- thanh cuộn xanh lá
 Stroke=Color3.fromRGB(0,120,60), -- viền xanh lá
 
@@ -108,7 +108,7 @@ Bold=Enum.Font.BuilderSansBold,
 ExtraBold=Enum.Font.BuilderSansExtraBold,
 SliderValue=Enum.Font.FredokaOne
 },
-BackgroundTransparency=0.03
+BackgroundTransparency=0.05
 }
 }
 
