@@ -54,8 +54,8 @@ Background=ColorSequence.new{
     ColorSequenceKeypoint.new(0.50, Color3.fromRGB(32,32,32)),
     ColorSequenceKeypoint.new(1.00, Color3.fromRGB(25,25,25))
 },
-Primary=Color3.fromRGB(0,200,83), -- xanh lá chính
-OnPrimary=Color3.fromRGB(0,150,60), -- xanh lá đậm hơn
+Primary=Color3.fromRGB(88,101,242),
+OnPrimary=Color3.fromRGB(61,67,135),
 ScrollBar=Color3.fromRGB(0,180,90), -- thanh cuộn xanh lá
 Stroke=Color3.fromRGB(0,120,60), -- viền xanh lá
 
@@ -69,8 +69,8 @@ Dialog={
     Background=Color3.fromRGB(28,28,28)
 },
 Buttons={
-    Holding=Color3.fromRGB(0,170,80), -- nút giữ xanh lá
-    Default=Color3.fromRGB(0,140,70)  -- nút thường xanh lá
+    Holding=Color3.fromRGB(0,155,70), -- nút giữ xanh lá
+    Default=Color3.fromRGB(28,28,30)  -- nút thường xanh lá
 },
 Border={
     Holding=Color3.fromRGB(0,150,75), -- viền giữ xanh lá
