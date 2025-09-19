@@ -60,7 +60,7 @@ ScrollBar=Color3.fromRGB(0,180,90), -- thanh cuộn xanh lá
 Stroke=Color3.fromRGB(0,120,60), -- viền xanh lá
 
 Error=Color3.fromRGB(255,102,102),
-Icons=Color3.fromRGB(232,233,235),
+Icons=Color3.fromRGB(0,190,50),
 
 JoinButton=Color3.fromRGB(37,128,69),
 Link=Color3.fromRGB(40,150,255),
@@ -2785,15 +2785,22 @@ ae.SetContent=ae.SetDescription
 ae.SetDesc=ae.SetDescription
 
 function af:CreateMobileMinimizer(ar)
-local as=z("ImageButton",F,{
-Size=UDim2.fromOffset(45,45),
-Position=UDim2.fromScale(0.17,0.28),
-AnchorPoint=Vector2.new(0.5,0.5),
-AutoButtonColor=false,
-ThemeTag={
-BackgroundColor3="Colors.Buttons.Default"
-}
-})
+    local as = z("ImageButton", F, {
+        Size = UDim2.fromOffset(45, 45),
+        Position = UDim2.fromScale(0.17, 0.28),
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        AutoButtonColor = false,
+        ThemeTag = {
+            BackgroundColor3 = "Colors.Buttons.Default"
+        }
+    })
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0.5, 0) -- 0.5 = tròn đều (thành hình tròn), có thể đổi thành UDim.new(0,10) để bo 10px
+    corner.Parent = as
+
+    return as
+end
 
 p(as.Activated,function()
 ac:Minimize()
