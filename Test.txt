@@ -7,15 +7,13 @@ local VirtualUser = game:GetService("VirtualUser") -- Anti AFK
 local player = Players.LocalPlayer
 local startTime = tick()
 
--- Thông báo khi chạy script
 StarterGui:SetCore("SendNotification", {
     Title = "Notification",
     Text = "Thanks for using my script <3",
     Duration = 5,
-    Button1 = "Ok! ",
+    Button1 = "Ok!",
 })
 
--- Anti AFK
 player.Idled:Connect(function()
     VirtualUser:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
     task.wait(1)
@@ -78,13 +76,12 @@ local function instantClickCookie(cookie)
     end
 end
 
--- GUI (thu nhỏ)
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CookieStatusGUI"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0,220,0,180) -- nhỏ hơn
+frame.Size = UDim2.new(0,220,0,180)
 frame.Position = UDim2.new(0,20,0,20)
 frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
 frame.BorderSizePixel = 0
@@ -119,13 +116,11 @@ local farmingLabel = createLabel(85,"Farming: Stopped",Color3.fromRGB(100,255,10
 local timeLabel = createLabel(105,"Time: 0s")
 local resetCountdownLabel = createLabel(125,"Reset in: 164s",Color3.fromRGB(255,200,100))
 local dateLabel = createLabel(145,"Date: "..os.date("%d/%m/%Y"),Color3.fromRGB(200,255,200))
-local creditsLabel = createLabel(165,"Credits: Kha hub Scripter",Color3.fromRGB(200,200,255))
+local creditsLabel = createLabel(165,"Credits: Kha Scripter X",Color3.fromRGB(200,200,255))
 
--- Countdown reset
 local resetInterval = 164
 local nextReset = tick() + resetInterval
 
--- Auto farm
 RunService.Heartbeat:Connect(function()
     local char, hrp = getCharacter()
     local cookies = findCookies()
@@ -167,7 +162,6 @@ workspace.Map.Functional.SpawnedItems.ChildAdded:Connect(function(cookie)
     end
 end)
 
--- Auto retry khi chết
 task.spawn(function()
     while true do
         task.wait(0.5)
@@ -180,7 +174,6 @@ task.spawn(function()
     end
 end)
 
--- Rainbow viền
 task.spawn(function()
     local hue = 0
     while true do
@@ -190,7 +183,6 @@ task.spawn(function()
     end
 end)
 
--- Auto reset mỗi 164 giây
 task.spawn(function()
     while true do
         task.wait(resetInterval)
@@ -208,11 +200,69 @@ task.spawn(function()
     end
 end)
 
--- Inf Jump
 UserInputService.JumpRequest:Connect(function()
     local char = player.Character or player.CharacterAdded:Wait()
     local humanoid = char:FindFirstChildOfClass("Humanoid")
     if humanoid then
         humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
+end)
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ZaloGroupGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 280, 0, 130)
+Frame.Position = UDim2.new(0.5, -140, 0.5, -65)
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+Frame.BorderSizePixel = 0
+Frame.BackgroundTransparency = 0.1
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = ScreenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = Frame
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(0, 170, 255)
+stroke.Thickness = 2
+stroke.Parent = Frame
+
+local TextLabel = Instance.new("TextLabel")
+TextLabel.Size = UDim2.new(1, -20, 0, 70)
+TextLabel.Position = UDim2.new(0, 10, 0, 10)
+TextLabel.BackgroundTransparency = 1
+TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.TextWrapped = true
+TextLabel.Font = Enum.Font.GothamSemibold
+TextLabel.TextSize = 14
+TextLabel.Text = "(VN) Nếu bạn là người Việt và có Zalo thì có thể vô nhóm Zalo này nhé:\n\n(EN) If you're Vietnamese and use Zalo, you can join this Zalo group:"
+TextLabel.Parent = Frame
+
+local Button = Instance.new("TextButton")
+Button.Size = UDim2.new(0, 160, 0, 32)
+Button.Position = UDim2.new(0.5, -80, 1, -45)
+Button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.Font = Enum.Font.GothamBold
+Button.TextSize = 14
+Button.Text = "Copy link group Zalo"
+Button.AutoButtonColor = true
+Button.Parent = Frame
+
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 6)
+btnCorner.Parent = Button
+
+Button.MouseButton1Click:Connect(function()
+    setclipboard("https://zalo.me/g/jjbetc720")
+    StarterGui:SetCore("SendNotification", {
+        Title = "Đã sao chép!",
+        Text = "Link nhóm Zalo đã được sao chép vào clipboard.",
+        Duration = 4
+    })
 end)
